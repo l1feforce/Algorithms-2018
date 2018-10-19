@@ -2,6 +2,10 @@
 
 package lesson2
 
+import lesson2.common.Graph
+import lesson2.common.PrefixTree
+import java.io.File
+
 /**
  * Получение наибольшей прибыли (она же -- поиск максимального подмассива)
  * Простая
@@ -92,7 +96,30 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
  * вернуть ту из них, которая встречается раньше в строке first.
  */
 fun longestCommonSubstring(first: String, second: String): String {
-    TODO()
+
+    fun getWordSubstrings(word: String): MutableSet<String> {
+        val setOfFirstSubstring = mutableSetOf<String>()
+
+        word.forEach { setOfFirstSubstring.add(it.toString()) }
+        for (i in 1..word.length) {
+            for (k in 1..word.length - i) {
+                setOfFirstSubstring.add(word.subSequence(k - 1, k + i).toString())
+            }
+        }
+        return setOfFirstSubstring
+    }
+
+    val firstSubstring = getWordSubstrings(first)
+    var max = -1
+    var bestWord = ""
+    firstSubstring.forEach {
+        if (second.contains(it) && it.length > max) {
+            bestWord = it
+            max = it.length
+        }
+    }
+
+    return bestWord
 }
 
 /**
@@ -136,5 +163,44 @@ fun calcPrimesNumber(limit: Int): Int {
  * Остальные символы ни в файле, ни в словах не допускаются.
  */
 fun baldaSearcher(inputName: String, words: Set<String>): Set<String> {
-    TODO()
+    val listOfVertexNames = mutableListOf<String>()
+    val setOfWords = mutableSetOf<String>()
+
+    fun split(inputName: String): Graph {
+        val graph = Graph()
+        val array = File(inputName).readLines().map {
+            it.split(" ")
+        }
+
+        for (y in 0 until array.size) {
+            for (x in 0 until array[y].size) {
+                graph.addVertex("cell$y$x", array[y][x].toUpperCase())
+                listOfVertexNames.add("cell$y$x")
+            }
+        }
+
+        for (y in 0 until array.size) {
+            for (x in 0 until array[y].size) {
+                //upper cell
+                if (y - 1 >= 0) graph.connect("cell$y$x", "cell${y - 1}$x")
+                //right cell
+                if (x + 1 <= 3) graph.connect("cell$y$x", "cell$y${x + 1}")
+                //bottom cell
+                if (y + 1 <= 2) graph.connect("cell$y$x", "cell${y + 1}$x")
+                //left cell
+                if (x - 1 >= 0) graph.connect("cell$y$x", "cell$y${x - 1}")
+            }
+        }
+        return graph
+    }
+
+    val dictionary = PrefixTree()
+    words.forEach { dictionary.insert(it.toUpperCase()) }
+
+    val field = split(inputName)
+    listOfVertexNames.forEach { vertex ->
+        val foundSet = field.wordsSearch(vertex, dictionary)
+        foundSet.forEach { setOfWords.add(it) }
+    }
+    return setOfWords
 }

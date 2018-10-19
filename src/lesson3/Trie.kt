@@ -1,5 +1,9 @@
 package lesson3
 
+import java.lang.StringBuilder
+import java.util.*
+import kotlin.NoSuchElementException
+
 class Trie : AbstractMutableSet<String>(), MutableSet<String> {
     override var size: Int = 0
         private set
@@ -57,11 +61,48 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
         return false
     }
 
+    inner class TrieIterator : MutableIterator<String> {
+        private val visited = mutableSetOf(root)
+        private var wordsFound = 0
+        private var lastNode = root
+        private val word = StringBuilder("")
+
+        private fun findWord(): String {
+            val min = lastNode.children.filter {
+                it.value !in visited
+            }
+            visited.add(lastNode)
+            min.forEach {
+                word.append(it.key)
+                if (contains(word.toString())) {
+                    wordsFound++
+                    return word.toString()
+                }
+                lastNode = it.value
+                findWord()
+            }
+            visited.remove(lastNode)
+            if (word.isNotEmpty()) word.setLength(word.length - 1)
+            return ""
+        }
+
+        override fun hasNext(): Boolean {
+            return wordsFound != size
+        }
+
+        override fun next(): String {
+            return findWord()
+        }
+
+        override fun remove() {
+
+        }
+
+    }
+
     /**
      * Итератор для префиксного дерева
      * Сложная
      */
-    override fun iterator(): MutableIterator<String> {
-        TODO()
-    }
+    override fun iterator(): MutableIterator<String> = TrieIterator()
 }

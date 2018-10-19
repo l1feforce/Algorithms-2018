@@ -44,12 +44,15 @@ class TrieTest {
     @Tag("Hard")
     fun rudeIteratorTest() {
         val trie = Trie()
-        trie.add("abcdefg")
-        trie.add("zyx")
-        trie.add("zwv")
-        trie.add("zyt")
-        trie.add("abcde")
-
-        assertEquals(setOf("abcdefg", "zyx", "zwv", "zyt", "abcde"), trie)
+        trie.add("балда")
+        trie.add("банка")
+        trie.add("бар")
+        trie.add("манка")
+        trie.add("барсук")
+        val iterator = trie.iterator()
+        while (iterator.hasNext()) {
+            println(iterator.next())
+        }
+        //assertEquals(setOf("abcdefg", "zyx", "zwv", "zyt", "abcde"), trie)
     }
 }

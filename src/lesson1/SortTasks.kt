@@ -2,6 +2,9 @@
 
 package lesson1
 
+import java.io.File
+import java.lang.Math.*
+
 /**
  * Сортировка времён
  *
@@ -95,7 +98,16 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 121.3
  */
 fun sortTemperatures(inputName: String, outputName: String) {
-    TODO()
+    val minTemp = -273
+    val maxTemp = 500
+
+    val input = File(inputName).readLines().map { ((it.toFloat() + abs(minTemp))).toInt() }
+    File("output/$outputName.txt").bufferedWriter().use { out ->
+        countingSort(input.toIntArray(), maxTemp + abs(minTemp)).forEach {
+            out.write((it.toFloat() - abs(minTemp)).toString())
+            out.newLine()
+        }
+    }
 }
 
 /**
