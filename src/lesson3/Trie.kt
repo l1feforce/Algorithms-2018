@@ -2,7 +2,6 @@ package lesson3
 
 import java.lang.StringBuilder
 import java.util.*
-import kotlin.NoSuchElementException
 
 class Trie : AbstractMutableSet<String>(), MutableSet<String> {
     override var size: Int = 0
@@ -66,32 +65,45 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
         private var wordsFound = 0
         private var lastNode = root
         private val word = StringBuilder("")
+        private var finalWord = ""
 
-        private fun findWord(): String {
+
+        private fun getNextWord(): String {
             val min = lastNode.children.filter {
                 it.value !in visited
             }
             visited.add(lastNode)
             min.forEach {
+                if (contains(finalWord)) {
+                    val tmp = finalWord
+                    finalWord = ""
+                    return tmp
+                }
                 word.append(it.key)
                 if (contains(word.toString())) {
                     wordsFound++
-                    return word.toString()
+                    println(word)
+                    lastNode = it.value
+                    finalWord = word.toString()
+                    return finalWord
                 }
                 lastNode = it.value
-                findWord()
+                getNextWord()
+                if (word.isNotEmpty()) word.setLength(word.length - 1)
             }
             visited.remove(lastNode)
             if (word.isNotEmpty()) word.setLength(word.length - 1)
-            return ""
+            return finalWord
         }
+
+
 
         override fun hasNext(): Boolean {
             return wordsFound != size
         }
 
         override fun next(): String {
-            return findWord()
+            return getNextWord()
         }
 
         override fun remove() {

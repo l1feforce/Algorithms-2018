@@ -21,9 +21,7 @@ class AlgorithmsTestsKotlin : AbstractAlgorithmsTests() {
     @Test
     @Tag("Normal")
     fun testLongestCommonSubstring() {
-        assertEquals("СЕРВАТОР", lesson2.longestCommonSubstring("ОБСЕРВАТОРИЯ", "КОНСЕРВАТОРЫ"))
-        assertEquals("стр", lesson2.longestCommonSubstring("абстрыяока", "жзстрмпока"))
-        assertEquals("ока", lesson2.longestCommonSubstring("абокаыястр", "жзстрмпока"))
+        longestCommonSubstring { first, second -> lesson2.longestCommonSubstring(first, second) }
     }
 
     @Test
@@ -35,8 +33,6 @@ class AlgorithmsTestsKotlin : AbstractAlgorithmsTests() {
     @Test
     @Tag("Hard")
     fun testBaldaSearcher() {
-        assertEquals(setOf("ТРАВА", "КРАН", "АКВА", "НАРТЫ"),
-                lesson2.baldaSearcher("input/balda_in1.txt", setOf("ТРАВА", "КРАН", "АКВА", "НАРТЫ", "РАК")))
-
+        baldaSearcher { inputName, words -> baldaSearcher(inputName, words) }
     }
 }

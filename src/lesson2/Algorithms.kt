@@ -5,6 +5,8 @@ package lesson2
 import lesson2.common.Graph
 import lesson2.common.PrefixTree
 import java.io.File
+import java.io.IOException
+
 
 /**
  * Получение наибольшей прибыли (она же -- поиск максимального подмассива)
@@ -94,32 +96,42 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
  * При сравнении подстрок, регистр символов *имеет* значение.
  * Если имеется несколько самых длинных общих подстрок одной длины,
  * вернуть ту из них, которая встречается раньше в строке first.
+ *
+ * time and space complexity: O(n*m)
  */
 fun longestCommonSubstring(first: String, second: String): String {
+    var substring = StringBuilder()
+    if (first.isEmpty() || second.isEmpty())
+        return ""
 
-    fun getWordSubstrings(word: String): MutableSet<String> {
-        val setOfFirstSubstring = mutableSetOf<String>()
+    val num = Array(first.length) { IntArray(second.length) }
+    var maxlen = 0
+    var lastSubsBegin = 0
 
-        word.forEach { setOfFirstSubstring.add(it.toString()) }
-        for (i in 1..word.length) {
-            for (k in 1..word.length - i) {
-                setOfFirstSubstring.add(word.subSequence(k - 1, k + i).toString())
+    for (i in 0 until first.length) {
+        for (j in 0 until second.length) {
+            if (first[i] == second[j]) {
+                if (i == 0 || j == 0)
+                    num[i][j] = 1
+                else
+                    num[i][j] = 1 + num[i - 1][j - 1]
+
+                if (num[i][j] > maxlen) {
+                    maxlen = num[i][j]
+                    val thisSubsBegin = i - num[i][j] + 1
+                    if (lastSubsBegin == thisSubsBegin) {
+                        substring.append(first[i])
+                    } else {
+                        lastSubsBegin = thisSubsBegin
+                        substring = StringBuilder()
+                        substring.append(first.substring(lastSubsBegin, i + 1))
+                    }
+                }
             }
         }
-        return setOfFirstSubstring
     }
 
-    val firstSubstring = getWordSubstrings(first)
-    var max = -1
-    var bestWord = ""
-    firstSubstring.forEach {
-        if (second.contains(it) && it.length > max) {
-            bestWord = it
-            max = it.length
-        }
-    }
-
-    return bestWord
+    return substring.toString()
 }
 
 /**
@@ -161,13 +173,17 @@ fun calcPrimesNumber(limit: Int): Int {
  * Все слова и буквы -- русские или английские, прописные.
  * В файле буквы разделены пробелами, строки -- переносами строк.
  * Остальные символы ни в файле, ни в словах не допускаются.
+ *
+ * complexity: O(?)
  */
 fun baldaSearcher(inputName: String, words: Set<String>): Set<String> {
     val listOfVertexNames = mutableListOf<String>()
     val setOfWords = mutableSetOf<String>()
 
+    //creating graph from the field
     fun split(inputName: String): Graph {
         val graph = Graph()
+        if (!File(inputName).exists()) throw IOException()
         val array = File(inputName).readLines().map {
             it.split(" ")
         }
@@ -184,9 +200,9 @@ fun baldaSearcher(inputName: String, words: Set<String>): Set<String> {
                 //upper cell
                 if (y - 1 >= 0) graph.connect("cell$y$x", "cell${y - 1}$x")
                 //right cell
-                if (x + 1 <= 3) graph.connect("cell$y$x", "cell$y${x + 1}")
+                if (x + 1 <= array[y].size - 1) graph.connect("cell$y$x", "cell$y${x + 1}")
                 //bottom cell
-                if (y + 1 <= 2) graph.connect("cell$y$x", "cell${y + 1}$x")
+                if (y + 1 <= array.size - 1) graph.connect("cell$y$x", "cell${y + 1}$x")
                 //left cell
                 if (x - 1 >= 0) graph.connect("cell$y$x", "cell$y${x - 1}")
             }
@@ -194,6 +210,7 @@ fun baldaSearcher(inputName: String, words: Set<String>): Set<String> {
         return graph
     }
 
+    //adding dictionary in trie
     val dictionary = PrefixTree()
     words.forEach { dictionary.insert(it.toUpperCase()) }
 

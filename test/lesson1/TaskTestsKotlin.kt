@@ -21,7 +21,7 @@ class TaskTestsKotlin : AbstractTaskTests() {
     @Test
     @Tag("Normal")
     fun testSortTemperatures() {
-        sortTemperatures("input/temp_in1.txt", "test")
+        sortTemperatures { inputName, outputName -> sortTemperatures(inputName, outputName) }
     }
 
     @Test

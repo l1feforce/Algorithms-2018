@@ -3,6 +3,7 @@
 package lesson1
 
 import java.io.File
+import java.io.IOException
 import java.lang.Math.*
 
 /**
@@ -62,10 +63,31 @@ fun sortTimes(inputName: String, outputName: String) {
  * Садовая 5 - Сидоров Петр, Сидорова Мария
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
+ *
+ * complexity: O(?)
  */
 fun sortAddresses(inputName: String, outputName: String) {
-    TODO()
+    if (!File(inputName).exists()) throw IOException()
+    val input = File(inputName).readLines().map { it.split(" - ") }
+
+    val map = mutableMapOf<String, MutableList<String>>()
+    input.forEach {
+        val ourString = it
+        if (map.containsKey(ourString[1])) map[ourString[1]]!!.add(ourString[0])
+        else map[ourString[1]] = mutableListOf(ourString[0])
+    }
+    File(outputName).bufferedWriter().use { out ->
+        map.toList().sortedWith(compareBy({ it.first.split(" ")[0] },
+                { it.first.split(" ")[1].toInt() }))
+                .toMap()
+                .forEach { key, value ->
+                    value.toSortedSet()
+                    out.write("$key - $value".replace("[", "").replace("]", ""))
+                    out.newLine()
+                }
+    }
 }
+
 
 /**
  * Сортировка температур
@@ -96,15 +118,18 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 24.7
  * 99.5
  * 121.3
+ *
+ * complexity: O(n)
  */
 fun sortTemperatures(inputName: String, outputName: String) {
     val minTemp = -273
     val maxTemp = 500
+    if (!File(inputName).exists()) throw IOException()
 
-    val input = File(inputName).readLines().map { ((it.toFloat() + abs(minTemp))).toInt() }
-    File("output/$outputName.txt").bufferedWriter().use { out ->
-        countingSort(input.toIntArray(), maxTemp + abs(minTemp)).forEach {
-            out.write((it.toFloat() - abs(minTemp)).toString())
+    val input = File(inputName).readLines().map { ((it.toDouble() * 10 + abs(minTemp) * 10)).toInt() }
+    File(outputName).bufferedWriter().use { out ->
+        countingSort(input.toIntArray(), (maxTemp + abs(minTemp)) * 10).forEach {
+            out.write(((it - abs(minTemp) * 10) / 10.0).toString())
             out.newLine()
         }
     }

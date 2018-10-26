@@ -48,10 +48,11 @@ class TrieTest {
         trie.add("банка")
         trie.add("бар")
         trie.add("манка")
-        trie.add("барсук")
+        //trie.add("барсук")
         val iterator = trie.iterator()
         while (iterator.hasNext()) {
-            println(iterator.next())
+            val word = iterator.next()
+            println("word is: $word")
         }
         //assertEquals(setOf("abcdefg", "zyx", "zwv", "zyt", "abcde"), trie)
     }
