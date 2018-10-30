@@ -2,6 +2,7 @@ package lesson3
 
 import java.lang.StringBuilder
 import java.util.*
+import kotlin.NoSuchElementException
 
 class Trie : AbstractMutableSet<String>(), MutableSet<String> {
     override var size: Int = 0
@@ -60,61 +61,67 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
         return false
     }
 
-    inner class TrieIterator : MutableIterator<String> {
-        private val visited = mutableSetOf(root)
-        private var wordsFound = 0
-        private var lastNode = root
-        private val word = StringBuilder("")
-        private var finalWord = ""
-
-
-        private fun getNextWord(): String {
-            val min = lastNode.children.filter {
-                it.value !in visited
-            }
-            visited.add(lastNode)
-            min.forEach {
-                if (contains(finalWord)) {
-                    val tmp = finalWord
-                    finalWord = ""
-                    return tmp
-                }
-                word.append(it.key)
-                if (contains(word.toString())) {
-                    wordsFound++
-                    println(word)
-                    lastNode = it.value
-                    finalWord = word.toString()
-                    return finalWord
-                }
-                lastNode = it.value
-                getNextWord()
-                if (word.isNotEmpty()) word.setLength(word.length - 1)
-            }
-            visited.remove(lastNode)
-            if (word.isNotEmpty()) word.setLength(word.length - 1)
-            return finalWord
-        }
-
-
-
-        override fun hasNext(): Boolean {
-            return wordsFound != size
-        }
-
-        override fun next(): String {
-            return getNextWord()
-        }
-
-        override fun remove() {
-
-        }
-
-    }
+    private fun StringBuilder.removeLast() = if (this.isNotEmpty()) this.setLength(this.length - 1) else this.setLength(this.length)
 
     /**
      * Итератор для префиксного дерева
      * Сложная
      */
-    override fun iterator(): MutableIterator<String> = TrieIterator()
+    override fun iterator(): MutableIterator<String> = object : MutableIterator<String> {
+        var foundWordsAmount = 0
+        val queue = ArrayDeque<Pair<Char?, Node>>()
+        val depthQueue = ArrayDeque<Int>()
+        val word = StringBuilder("")
+
+        init {
+            queue.add(null to root)
+        }
+
+        override fun hasNext(): Boolean {
+            return size != foundWordsAmount
+        }
+
+        override fun next(): String {
+            while (queue.isNotEmpty()) {
+                val next = queue.poll()
+                val neighbors = next.second.children
+                val isWord = neighbors.containsKey(0.toChar())
+                val isFork = isWord && neighbors.size > 2 || !isWord && neighbors.size > 1
+
+                if (next.first != null) word.append(next.first!!)
+
+                neighbors.forEach { char, node ->
+                    if (char != 0.toChar()) queue.addFirst(char to node)
+                }
+
+                if (isFork) {
+                    depthQueue.add(1)
+                } else {
+                    val tmp = depthQueue.poll() + 1
+                    depthQueue.add(tmp)
+                }
+
+                val tmp = word.toString()
+                if (neighbors.containsKey(0.toChar()) && neighbors.size == 1) {
+                    val depth = depthQueue.poll()
+                    depthQueue.add(queue.size)
+                    for (i in 0 until depth) {
+                        word.removeLast()
+                    }
+                }
+                if (isWord) {
+                    if (contains(tmp)) {
+                        foundWordsAmount++
+                        return tmp
+                    }
+                }
+            }
+            throw NoSuchElementException()
+        }
+
+        override fun remove() {
+            this@Trie.remove(word.toString())
+        }
+
+    }
 }
