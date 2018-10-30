@@ -70,6 +70,7 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
     override fun iterator(): MutableIterator<String> = object : MutableIterator<String> {
         var foundWordsAmount = 0
         val queue = ArrayDeque<Pair<Char?, Node>>()
+        val visited = mutableSetOf<Node>()
         val depthQueue = ArrayDeque<Int>()
         val word = StringBuilder("")
 
@@ -84,14 +85,15 @@ class Trie : AbstractMutableSet<String>(), MutableSet<String> {
         override fun next(): String {
             while (queue.isNotEmpty()) {
                 val next = queue.poll()
+                visited.add(next.second)
                 val neighbors = next.second.children
                 val isWord = neighbors.containsKey(0.toChar())
                 val isFork = isWord && neighbors.size > 2 || !isWord && neighbors.size > 1
-
+                println("tmp wrd: $word")
                 if (next.first != null) word.append(next.first!!)
 
                 neighbors.forEach { char, node ->
-                    if (char != 0.toChar()) queue.addFirst(char to node)
+                    if (char != 0.toChar() && node !in visited) queue.addFirst(char to node)
                 }
 
                 if (isFork) {

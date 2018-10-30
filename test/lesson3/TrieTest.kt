@@ -49,12 +49,15 @@ class TrieTest {
         trie.add("бар")
         trie.add("манка")
         trie.add("барсук")
-        assertEquals(setOf("балда", "банка", "бар", "манка", "барсук"), trie)
+        trie.add("свалка")
+        trie.add("манта")
+        assertEquals(setOf("балда", "банка", "бар", "манка", "барсук", "свалка"/*, "манта"*/), trie)
         val iter = trie.iterator()
         while (iter.hasNext()) {
             val next = iter.next()
+            println("next is: $next")
             if (next == "бар") iter.remove()
         }
-        assertEquals(setOf("балда", "банка", "манка", "барсук"), trie)
+        assertEquals(setOf("балда", "банка", "манка", "барсук", "свалка"/*, "манта"*/), trie)
     }
 }
