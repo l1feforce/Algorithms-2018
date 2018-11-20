@@ -14,6 +14,14 @@ class Path private constructor(
 
     operator fun contains(v: Vertex) = v in vertices
 
+    fun removeLast(): Path =
+            when (length) {
+                0 -> this
+                1 -> Path(vertices.first())
+                else -> Path(vertices.dropLast(1), length - 1)
+            }
+
+
     constructor(first: Vertex) : this(listOf(first), 0)
 
     constructor(previous: Path, g: Graph, next: Vertex) :

@@ -2,6 +2,8 @@
 
 package lesson5
 
+import kotlin.math.max
+
 
 /**
  * Эйлеров цикл.
@@ -132,5 +134,22 @@ fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
  * Ответ: A, E, J, K, D, C, H, G, B, F, I
  */
 fun Graph.longestSimplePath(): Path {
-    TODO()
+    val start = vertices.first()
+    val visited = mutableSetOf<Graph.Vertex>()
+    var path = Path(start)
+    var maxPath = path
+
+    fun dfs(start: Graph.Vertex): Path {
+        val min = getNeighbors(start).filter { it !in visited }
+        visited.add(start)
+        min.forEach {
+            path = Path(path, this, it)
+            maxPath = maxOf(path, maxPath)
+            dfs(it)
+        }
+        path = path.removeLast()
+        visited.remove(start)
+        return maxPath
+    }
+    return dfs(start)
 }
