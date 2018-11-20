@@ -2,6 +2,7 @@
 
 package lesson5
 
+
 /**
  * Эйлеров цикл.
  * Средняя
@@ -89,7 +90,25 @@ fun Graph.minimumSpanningTree(): Graph {
  * Эта задача может быть зачтена за пятый и шестой урок одновременно
  */
 fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
-    TODO()
+    val start = vertices.elementAt(0)
+    val visited = mutableSetOf<Graph.Vertex>()
+    var counter = 0
+    val list = listOf(mutableSetOf<Graph.Vertex>(), mutableSetOf())
+    list[counter + 1].add(start)
+
+    fun dfs(start: Graph.Vertex): Set<Graph.Vertex> {
+        val min = getNeighbors(start).filter { it !in visited }
+        visited.add(start)
+        min.forEach {
+            list[counter].add(it)
+            counter = if (counter == 0) 1 else 0
+            dfs(it)
+        }
+        counter = if (counter == 0) 1 else 0
+        visited.remove(start)
+        return list.reversed().maxBy { it.size }?.toSet() ?: setOf()
+    }
+    return dfs(start)
 }
 
 /**
