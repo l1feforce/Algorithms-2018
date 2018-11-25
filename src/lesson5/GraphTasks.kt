@@ -2,8 +2,6 @@
 
 package lesson5
 
-import kotlin.math.max
-
 
 /**
  * Эйлеров цикл.
@@ -90,18 +88,20 @@ fun Graph.minimumSpanningTree(): Graph {
  * В данном случае ответ (A, E, F, D, G, J)
  *
  * Эта задача может быть зачтена за пятый и шестой урок одновременно
+ *
+ * Complexity: both O(n), n - edges in graph
  */
 fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
     val start = vertices.elementAt(0)
     val visited = mutableSetOf<Graph.Vertex>()
     var counter = 0
-    val list = listOf(mutableSetOf<Graph.Vertex>(), mutableSetOf())
+    val list = arrayOf(mutableSetOf<Graph.Vertex>(), mutableSetOf())
     list[counter + 1].add(start)
 
     fun dfs(start: Graph.Vertex): Set<Graph.Vertex> {
-        val min = getNeighbors(start).filter { it !in visited }
+        val neighbors = getNeighbors(start).filter { it !in visited }
         visited.add(start)
-        min.forEach {
+        neighbors.forEach {
             list[counter].add(it)
             counter = if (counter == 0) 1 else 0
             dfs(it)
@@ -132,6 +132,8 @@ fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
  * J ------------ K
  *
  * Ответ: A, E, J, K, D, C, H, G, B, F, I
+ *
+ * Complexity: both O(n), n - edges in graph
  */
 fun Graph.longestSimplePath(): Path {
     val start = vertices.first()
