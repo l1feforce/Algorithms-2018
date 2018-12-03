@@ -65,6 +65,30 @@ fun Graph.minimumSpanningTree(): Graph {
     TODO()
 }
 
+//common part for the last two tasks
+abstract class Result<T> {
+    abstract fun remove(): T
+    abstract fun doActions(vertex: Graph.Vertex): T
+    abstract fun getResult(): T
+}
+
+fun <T> dfs(start: Graph.Vertex, graph: Graph, result: Result<T>): T {
+    fun <T> dfs(start: Graph.Vertex, graph: Graph, visited: MutableSet<Graph.Vertex>, result: Result<T>)
+            : T {
+        val neighbors = graph.getNeighbors(start).filter { it !in visited }
+        visited.add(start)
+        neighbors.forEach {
+            result.doActions(it)
+            dfs(it, graph, visited, result)
+        }
+        result.remove()
+        visited.remove(start)
+        return result.getResult()
+    }
+    return dfs(start, graph, mutableSetOf(), result)
+}
+
+
 /**
  * Максимальное независимое множество вершин в графе без циклов.
  * Сложная
@@ -89,28 +113,51 @@ fun Graph.minimumSpanningTree(): Graph {
  *
  * Эта задача может быть зачтена за пятый и шестой урок одновременно
  *
- * Complexity: both O(n), n - edges in graph
+ * Ресурсоемкость - O(n), n - кол-во вершин в графе
+ * Трудоемкость - O(n+e), n - кол-во вершин в графе, e - кол-во ребер в графе
  */
 fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
-    val start = vertices.elementAt(0)
-    val visited = mutableSetOf<Graph.Vertex>()
-    var counter = 0
-    val list = arrayOf(mutableSetOf<Graph.Vertex>(), mutableSetOf())
-    list[counter + 1].add(start)
+    val first = vertices.first()
 
-    fun dfs(start: Graph.Vertex): Set<Graph.Vertex> {
-        val neighbors = getNeighbors(start).filter { it !in visited }
-        visited.add(start)
-        neighbors.forEach {
-            list[counter].add(it)
-            counter = if (counter == 0) 1 else 0
-            dfs(it)
+    class IndependentVertexCounter : Result<Set<Graph.Vertex>>() {
+        var counter = 0
+        val pair = MyPair(mutableSetOf(), mutableSetOf())
+        val actionsResult = setOf<Graph.Vertex>()
+
+        init {
+            pair.second.add(first)
         }
-        counter = if (counter == 0) 1 else 0
-        visited.remove(start)
-        return list.reversed().maxBy { it.size }?.toSet() ?: setOf()
+
+        override fun remove(): Set<Graph.Vertex> {
+            pair.reverse()
+            return getResult()
+        }
+
+        override fun doActions(vertex: Graph.Vertex): Set<Graph.Vertex> {
+            if (pair.isFirst) pair.first.add(vertex) else pair.second.add(vertex)
+            pair.reverse()
+            return getResult()
+        }
+
+        override fun getResult(): Set<Graph.Vertex> {
+            return pair.toList().reversed().maxBy{ it.size }?.toSet() ?: setOf()
+        }
     }
-    return dfs(start)
+
+    val result = IndependentVertexCounter()
+    return dfs(first, this, result)
+}
+
+class MyPair(val first: MutableSet<Graph.Vertex>, val second: MutableSet<Graph.Vertex>) {
+    var isFirst = true
+
+    fun reverse() {
+        isFirst = !isFirst
+    }
+
+    fun toList(): List<MutableSet<Graph.Vertex>> {
+        return listOf(first, second)
+    }
 }
 
 /**
@@ -133,25 +180,31 @@ fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
  *
  * Ответ: A, E, J, K, D, C, H, G, B, F, I
  *
- * Complexity: both O(n), n - edges in graph
+ * Complexity: both O(!n), n - edges in graph
  */
 fun Graph.longestSimplePath(): Path {
-    val start = vertices.first()
-    val visited = mutableSetOf<Graph.Vertex>()
-    var path = Path(start)
-    var maxPath = path
+    val first = vertices.first()
 
-    fun dfs(start: Graph.Vertex): Path {
-        val min = getNeighbors(start).filter { it !in visited }
-        visited.add(start)
-        min.forEach {
-            path = Path(path, this, it)
-            maxPath = maxOf(path, maxPath)
-            dfs(it)
+    class LongestSimplePathFinder : Result<Path>() {
+        var path = Path(first)
+        var maxPath = path
+
+        override fun remove(): Path {
+            path = path.removeLast()
+            return getResult()
         }
-        path = path.removeLast()
-        visited.remove(start)
-        return maxPath
+
+        override fun doActions(vertex: Graph.Vertex): Path {
+            path = Path(path, this@longestSimplePath, vertex)
+            maxPath = maxOf(path, maxPath)
+            return getResult()
+        }
+
+        override fun getResult(): Path {
+            return maxPath
+        }
     }
-    return dfs(start)
+
+    val result = LongestSimplePathFinder()
+    return dfs(first, this, result)
 }
